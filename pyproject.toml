@@ -1,0 +1,33 @@
+[project]
+name = "iqdeepdive-workiq"
+version = "0.1.0"
+description = "Work IQ notebooks and the workmate hosted agent for the Microsoft IQ Deep Dive series"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.13.5",
+    "azure-identity>=1.25.2",
+    "ipykernel==7.2.0",
+    "msal>=1.31.0",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyyaml>=6.0.3",
+    "ruff>=0.15.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ty.environment]
+python = ".venv"
+
+[tool.ruff]
+extend-exclude = ["notebooks"]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
