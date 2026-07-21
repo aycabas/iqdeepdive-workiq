@@ -15,25 +15,26 @@ Pamela's Foundry IQ agent demos **Publish to Teams** (a Teams app that runs on-b
 signed-in user). Because our `workmate-agent` is a Work IQ **digital worker** (acting as itself),
 we demo the **Agent 365 autopilot** path instead.
 
-## Why this needs no bespoke deploy scripts
+## From hosted agent to Agent 365 digital worker
 
 A hosted Foundry agent (`host: azure.ai.agent`) is provisioned with its own **agent identity /
-blueprint id** — an Entra identity (a `ManagedAgentIdentityBlueprint`) Foundry uses for
-on-behalf-of token exchange. That identity is exactly what an Agent 365 digital worker needs, so
-there is **no hand-rolled blueprint/bot/publish pipeline in this repo** anymore. You deploy the
-agent with `azd`, then an admin onboards it as a digital worker from the **Agent 365 admin
-portal** — not from Foundry.
+blueprint id** (a `ManagedAgentIdentityBlueprint`). That covers *identity*, but becoming a Teams
+digital worker also requires **registering the agent in the Agent 365 registry** — which our
+`azd deploy` does **not** do on its own. Publishing an autopilot additionally provisions an
+**Azure Bot Service** (the Teams transport) and submits an **autopilot request** that creates a
+pending blueprint in the Microsoft 365 admin center for **admin approval**.
 
-> Foundry's own **Publish** button only creates a **Teams agent app** (this is what Pamela's
-> Foundry IQ agent demos). The **Agent 365 autopilot / digital worker** path is a separate
-> onboarding done by an admin in the Microsoft 365 / Agent 365 admin portal against the agent's
-> blueprint identity.
+> Foundry's plain **Publish** button (Teams agent app) is *not* the same as publishing an
+> **Agent 365 autopilot**. The autopilot path is what registers the digital worker; it is
+> documented in [Publish an autopilot in Microsoft Agent 365](https://learn.microsoft.com/azure/foundry/agents/how-to/agent-365).
 
 ```mermaid
 flowchart LR
-  azd[azd deploy workmate-agent] --> agent[Hosted workmate-agent + blueprint identity]
-  agent --> a365["Agent 365 admin portal: onboard as digital worker"]
-  a365 --> teams[Autopilot / digital worker in Microsoft Teams]
+  azd[azd deploy workmate-agent] --> agent[Hosted agent + blueprint identity]
+  agent --> pub[Publish as autopilot: Bot Service + autopilot request]
+  pub --> approve["Admin approves in M365 admin center (/agents/all/requested)"]
+  approve --> reg[Agent 365 registry]
+  reg --> teams[Digital worker in Microsoft Teams]
   teams --> obo[Work IQ as the digital worker's own M365 identity]
 ```
 
@@ -42,12 +43,20 @@ flowchart LR
 1. **Deploy the agent:** `azd deploy workmate-agent`. Confirm it runs in the Foundry playground
    as your signed-in user (Work IQ answers about *your* mail/meetings). Note the agent's
    **Blueprint Client ID** from `azd ai agent show workmate-agent`.
-2. **Onboard it as an Agent 365 digital worker:** in the **Agent 365 admin portal** (Microsoft
-   365 admin center), an admin registers/onboards the agent as a digital worker (autopilot) using
-   that blueprint identity. This is *not* the Foundry **Publish** button — that only produces a
-   Teams agent app.
-3. **Chat with it in Teams:** the autopilot appears as a digital worker; it runs Work IQ **as its
-   own M365 identity** (its own mailbox/context), not on behalf of the person chatting with it.
+2. **Register `Microsoft.BotService`** (once per subscription) if needed:
+   `az provider register --namespace Microsoft.BotService`.
+3. **Publish as an autopilot:** from Foundry, publish the hosted agent as an **Agent 365
+   autopilot**. This provisions the **Azure Bot Service** transport and submits the **autopilot
+   request** that creates a pending blueprint in the Microsoft 365 admin center. (The end-to-end
+   reference automation is the
+   [FoundryA365 sample](https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/csharp/foundry-autopilot-agent).)
+4. **Admin approval:** an **AI Administrator / Global Administrator** approves the pending request
+   at [admin.cloud.microsoft/#/agents/all/requested](https://admin.cloud.microsoft/?#/agents/all/requested).
+   After approval the agent appears in the **Agent 365 registry**.
+5. **Verify + use in Teams:** confirm the blueprint's messaging endpoint + app id in the
+   [Teams Developer Portal](https://dev.teams.microsoft.com/apps), then in Teams go to
+   **Apps → Agents for your team**, find the agent, and create an instance. It runs Work IQ **as
+   its own M365 identity** (its own mailbox), not on behalf of the person chatting with it.
 
 ## What the autopilot still needs for Work IQ
 

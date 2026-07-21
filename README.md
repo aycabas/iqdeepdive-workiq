@@ -103,15 +103,15 @@ azd ai agent invoke workmate-agent "What did my manager email me about this week
 
 ## Ship it as an Agent 365 autopilot
 
-A hosted Foundry agent comes with its own **agent identity (blueprint id)**, so it needs no
-bespoke blueprint/bot scripts. Deploy with `azd`, then an admin onboards it as a digital worker
-from the **Agent 365 admin portal** (Microsoft 365 admin center) using that blueprint identity.
-Note: Foundry's own **Publish** button only creates a **Teams agent app** — that's the path
-Pamela's Foundry IQ agent demos. The **Agent 365 autopilot / digital worker** onboarding is a
-separate admin step outside Foundry. In the Foundry playground the agent acts **on behalf of you**
-(Work IQ answers about your M365); as a Teams digital worker it acts **as its own M365 identity**
-(its own mailbox), not on behalf of the person chatting with it. `do_action` lets it take action
-(always after showing a draft). See [`docs/teams.md`](docs/teams.md).
+A hosted Foundry agent comes with its own **agent identity (blueprint id)**, but registering it in
+the **Agent 365 registry** is a distinct step our `azd deploy` doesn't do: publishing as an
+autopilot also provisions an **Azure Bot Service** (Teams transport) and submits an **autopilot
+request** that lands as a pending blueprint in the Microsoft 365 admin center for **admin
+approval**. Note: Foundry's plain **Publish** button only creates a **Teams agent app** — the
+**Agent 365 autopilot** path is what registers the digital worker. In the Foundry playground the
+agent acts **on behalf of you** (Work IQ answers about your M365); as a Teams digital worker it
+acts **as its own M365 identity** (its own mailbox), not on behalf of the person chatting with it.
+`do_action` lets it take action (always after showing a draft). See [`docs/teams.md`](docs/teams.md).
 
 ## Slides
 
