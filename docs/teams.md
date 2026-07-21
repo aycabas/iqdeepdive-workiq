@@ -1,47 +1,43 @@
 # Shipping `workmate-agent` as an Agent 365 autopilot
 
-Work IQ runs in the **signed-in user's** context. A Foundry hosted agent invoked with an app or
-managed identity gets `requires a signed-in user`. The reliable user-context paths are the signed-in
-Foundry playground and — for real users — publishing the agent as an **Agent 365 autopilot**
-(digital worker) in Microsoft Teams, where the caller's token flows on-behalf-of so Work IQ (and
-`do_action`) work.
+Work IQ always runs in the **signed-in user's** context. A Foundry hosted agent called with an
+app or managed identity gets `requires a signed-in user`, so the two paths that actually work are
+the signed-in Foundry playground and — for real end users — publishing the agent so the caller's
+token flows on-behalf-of and Work IQ answers as *that* person.
 
-## Publishing the autopilot (blueprint + bot)
+Pamela's Foundry IQ agent demos **Publish to Teams** (a Teams app). Because our `workmate-agent`
+is a Work IQ digital worker, we demo the **Agent 365 autopilot** path instead.
 
-Shipping the hosted agent to Teams takes a short, repeatable pipeline — the scripts
-in [`deploy/`](../deploy/) do it against an **existing** Foundry project (no new
-account/project provisioned). Two new resources are created:
+## Why this needs no bespoke deploy scripts
 
-- an **agent-identity blueprint** — the agent's Entra identity (auth + on-behalf-of
-  exchange), referenced by the hosted agent version, and
-- an **Azure Bot + Teams channel** — the transport that registers the blueprint's
-  app id against the agent's activity-protocol endpoint so Teams can reach it.
-
-They are complementary: the blueprint is *who the agent is*, the bot is *how Teams
-delivers messages to it*. Skipping the bot means Teams has nowhere to deliver to and
-the worker never replies (verified: deleting the bot silently breaks routing).
+A hosted Foundry agent (`host: azure.ai.agent`) is provisioned with its own **agent identity /
+blueprint id** — an Entra identity Foundry uses for on-behalf-of token exchange. That identity is
+exactly what an Agent 365 autopilot needs, so there is **no hand-rolled blueprint/bot/publish
+pipeline in this repo** anymore. You deploy the agent with `azd`, then publish it from Foundry.
 
 ```mermaid
 flowchart LR
-  bp[Blueprint identity] --> agent[Hosted workmate-agent]
-  agent --> bot[Azure Bot + Teams channel]
-  bot --> teams[Reply in Teams]
+  azd[azd deploy workmate-agent] --> agent[Hosted workmate-agent + agent identity]
+  agent --> publish["Publish -> Agent 365 (autopilot)"]
+  publish --> teams[Digital worker in Microsoft Teams]
   teams --> obo[Work IQ on-behalf-of the signed-in user]
 ```
 
-See [`deploy/README.md`](../deploy/README.md) for the exact ordered steps and
-troubleshooting.
+## Steps
+
+1. **Deploy the agent:** `azd deploy workmate-agent`. Confirm it runs in the Foundry playground
+   as your signed-in user (Work IQ answers about *your* mail/meetings).
+2. **Publish as an Agent 365 autopilot:** in the Foundry portal open `workmate-agent`, choose
+   **Publish → Agent 365 / digital worker**, and complete the publish flow. Foundry uses the
+   agent's auto-provisioned identity — you do **not** create a blueprint or Azure Bot by hand.
+3. **Chat with it in Teams:** the autopilot appears as a digital worker; messages run Work IQ
+   on-behalf-of the Teams user.
 
 ## What the autopilot still needs for Work IQ
 
-For the autopilot to call Work IQ on-behalf-of the Teams user:
-
-- Each Teams user needs a **Microsoft 365 Copilot license** (propagation takes 15-30 min).
-- The blueprint SP must have the **IQ OBO** grants (`user_impersonation` on
-  Microsoft Cognitive Services + Azure Machine Learning) so Foundry resolves the
-  Work IQ connection as the signed-in user — `deploy/05-create-oauth-grants.ps1`.
-- The agent's instance identity needs **Cognitive Services User** on the account
-  (`deploy/03-create-agent.ps1`).
+- Each Teams user needs a **Microsoft 365 Copilot license** (propagation takes 15–30 min).
+- The `work-iq-tools` toolbox + `RemoteA2A` connection must exist in the project
+  (created by `infra/create-workiq-toolbox.py` during `azd up`).
 - The Foundry project must **not** be VNet-restricted (Work IQ does not support VNet integration).
 
 ## Demo prompts (Teams)
@@ -50,4 +46,5 @@ For the autopilot to call Work IQ on-behalf-of the Teams user:
 - "Summarize my meetings today and flag anything I owe a follow-up on."
 - "Find the latest deck on the Contoso launch and tell me who last edited it."
 
-The autopilot shows a draft first; on your confirmation it sends via Work IQ `do_action`.
+Because Work IQ writes go through `do_action`, the autopilot shows a draft first and only sends
+after you confirm.

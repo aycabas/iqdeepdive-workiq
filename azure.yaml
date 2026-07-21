@@ -8,7 +8,7 @@ services:
         language: ""
         endpoint: ""
     workmate-agent:
-        project: src/workmate_agent
+        project: src/workmate-agent
         host: azure.ai.agent
         language: python
         uses:
@@ -24,8 +24,8 @@ services:
         environmentVariables:
             - name: AZURE_AI_MODEL_DEPLOYMENT_NAME
               value: ${AZURE_AI_MODEL_DEPLOYMENT_NAME}
-            - name: WORK_IQ_CONNECTION_ID
-              value: ${WORK_IQ_CONNECTION_ID}
+            - name: CUSTOM_FOUNDRY_WORKIQ_TOOLBOX_NAME
+              value: ${CUSTOM_FOUNDRY_WORKIQ_TOOLBOX_NAME=work-iq-tools}
         kind: hosted
         name: workmate-agent
         protocols:

@@ -15,14 +15,15 @@ action** (draft and send follow-ups) via `do_action`, which a knowledge base can
 
 This repo combines a five-part Work IQ notebook lab with one deployable
 [Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/) agent —
-**`workmate-agent`** — a Contoso "navigate my day" assistant that deploys as an **Agent 365 autopilot** (digital worker) in Microsoft Teams.
+**`workmate-agent`** — a Contoso "navigate my day" assistant that mounts Work IQ as a Foundry
+**toolbox** and ships as an **Agent 365 autopilot** (digital worker) in Microsoft Teams.
 
 ```mermaid
 flowchart LR
-  azd[azd up] --> foundry[Foundry project and model]
-  azd --> conn[Work IQ RemoteA2A connection]
+  azd[azd up] --> conn[Work IQ RemoteA2A connection]
+  conn --> toolbox[work-iq-tools toolbox]
+  toolbox --> agent[Hosted workmate-agent]
   conn --> notebooks[Five Work IQ notebooks]
-  conn --> agent[Hosted workmate-agent]
   agent --> teams[Agent 365 autopilot in Teams]
 ```
 
@@ -41,17 +42,31 @@ context of the signed-in user and honors all Microsoft 365 permissions and sensi
 | Write path | `do_action` (MCP) — the only way to trigger side effects (send mail, create event) |
 | Per user | Microsoft 365 Copilot license required |
 
+## Repo layout
+
+```
+notebooks/            Five-part Work IQ lab (parts 1–5)
+src/workmate-agent/   The hosted agent: main.py + workiq_consent.py (Work IQ toolbox, MAF)
+infra/                setup-env.py + create-workiq-toolbox.py + postprovision hooks
+docs/teams.md         Publishing workmate-agent as an Agent 365 autopilot
+slides/               The talk deck
+```
+
+The agent is intentionally two hand-written files — `main.py` builds a MAF `Agent` over a
+`FoundryChatClient` and a `FoundryToolbox` (the `work-iq-tools` toolbox), and `workiq_consent.py`
+teaches the MAF host to surface Work IQ's OAuth consent prompt.
+
 ## Prerequisites
 
 - An Azure subscription with permission to create resources and role assignments
 - [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
   with the `azure.ai.agents` extension
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) and Python 3.12+
-- Quota in one region for Foundry hosted agents and `gpt-5.4`
+- An existing (or newly created) Foundry project with a `gpt-5.4`-class model, **not**
+  VNet-restricted (Work IQ does not support VNet integration)
 - **A Microsoft 365 Copilot license** on your test user (propagation takes 15–30 min)
-- An **Entra app registration** with `WorkIQAgent.Ask` admin-consented — see
+- An **Entra Global Administrator** for the one-time Work IQ admin-consent — see
   [`ADMIN_SETUP.md`](ADMIN_SETUP.md)
-- The Foundry project must **not** be VNet-restricted (Work IQ does not support VNet integration)
 
 ## Provision
 
@@ -59,8 +74,10 @@ context of the signed-in user and honors all Microsoft 365 permissions and sensi
 azd up
 ```
 
-`azd up` provisions the Foundry project + `gpt-5.4`, creates the **Work IQ `RemoteA2A`
-connection**, writes generated settings to `.env`, and deploys `workmate-agent`.
+`azd up` binds to the Foundry project, then the postprovision hook runs
+`infra/create-workiq-toolbox.py`: it creates the Work IQ Entra app + `RemoteA2A` connection +
+the **`work-iq-tools` toolbox**, and writes settings to `.env`. Then `azd deploy workmate-agent`
+ships the hosted agent.
 
 ## Run the notebooks (in order)
 
@@ -80,24 +97,18 @@ Open `notebooks/` in VS Code, select `.venv`, and run:
 ## Run and invoke the workmate agent
 
 ```shell
-azd ai agent run
-azd ai agent invoke --local "What did my manager email me about this week, and draft a reply?"
-
 azd deploy workmate-agent
-azd ai agent invoke workmate-agent "Summarize my meetings today and flag anything I owe a follow-up on"
+azd ai agent invoke workmate-agent "What did my manager email me about this week, and draft a reply?"
 ```
 
 ## Ship it as an Agent 365 autopilot
 
-The hosted `workmate-agent` publishes as an **Agent 365 autopilot** (a digital worker)
-in Microsoft Teams. The [`deploy/`](deploy/) scripts do this against an **existing**
-Foundry project (reusing its Work IQ connection + model + registry — no new
-account/project), creating just two new resources: the agent-identity **blueprint**
-and an **Azure Bot + Teams channel** transport. In Teams, Work IQ runs
-**on-behalf-of the signed-in user**, and `do_action` lets the autopilot take action in
-that user's Microsoft 365 — always after showing a draft for confirmation. See
-[`deploy/README.md`](deploy/README.md) and [`docs/teams.md`](docs/teams.md) for the
-ordered steps, the blueprint-vs-bot explanation, and Teams auth troubleshooting.
+A hosted Foundry agent comes with its own **agent identity (blueprint id)**, so publishing it as
+a digital worker needs no bespoke blueprint/bot scripts. Deploy with `azd`, then in the Foundry
+portal choose **Publish → Agent 365 / digital worker**. Where Pamela publishes her Foundry IQ
+agent as a **Teams app**, we publish `workmate-agent` as an **Agent 365 autopilot** — in Teams,
+Work IQ runs **on-behalf-of the signed-in user**, and `do_action` lets it take action in that
+user's Microsoft 365 (always after showing a draft). See [`docs/teams.md`](docs/teams.md).
 
 ## Slides
 

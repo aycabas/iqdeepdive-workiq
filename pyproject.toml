@@ -5,9 +5,11 @@ description = "Work IQ notebooks and the workmate hosted agent for the Microsoft
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.13.5",
+    "azure-ai-projects>=1.1.0b4",
     "azure-identity>=1.25.2",
     "ipykernel==7.2.0",
     "msal>=1.31.0",
+    "msgraph-sdk>=1.0.0",
     "python-dotenv>=1.2.2",
     "requests>=2.33.0",
 ]
