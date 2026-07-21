@@ -108,9 +108,10 @@ bespoke blueprint/bot scripts. Deploy with `azd`, then an admin onboards it as a
 from the **Agent 365 admin portal** (Microsoft 365 admin center) using that blueprint identity.
 Note: Foundry's own **Publish** button only creates a **Teams agent app** — that's the path
 Pamela's Foundry IQ agent demos. The **Agent 365 autopilot / digital worker** onboarding is a
-separate admin step outside Foundry. In Teams, Work IQ runs **on-behalf-of the signed-in user**,
-and `do_action` lets it take action in that user's Microsoft 365 (always after showing a draft).
-See [`docs/teams.md`](docs/teams.md).
+separate admin step outside Foundry. In the Foundry playground the agent acts **on behalf of you**
+(Work IQ answers about your M365); as a Teams digital worker it acts **as its own M365 identity**
+(its own mailbox), not on behalf of the person chatting with it. `do_action` lets it take action
+(always after showing a draft). See [`docs/teams.md`](docs/teams.md).
 
 ## Slides
 
