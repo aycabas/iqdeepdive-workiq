@@ -90,6 +90,11 @@ try {
 
     if ($WhatIf) { Write-Host "-WhatIf: resolved values only, no changes made." -ForegroundColor Yellow; return }
 
+    # 0) Enable the Teams "activity" protocol + BotServiceRbac auth on the agent endpoint.
+    #    azd deploy only enables the `responses` protocol; the Bot Service needs `activity`.
+    Write-Host "=== [0/5] Enabling activity protocol on agent endpoint ===" -ForegroundColor Cyan
+    & "$PSScriptRoot/enable-activity-protocol.ps1" -AgentName $AgentName
+
     # 1) Register Microsoft.BotService provider (idempotent).
     Write-Host "=== [1/5] Registering Microsoft.BotService provider ===" -ForegroundColor Cyan
     $state = az provider show --namespace Microsoft.BotService --query registrationState -o tsv 2>$null

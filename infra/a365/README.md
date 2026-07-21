@@ -12,6 +12,7 @@ and the [FoundryA365 sample](https://github.com/microsoft-foundry/foundry-sample
 
 | Step | Script | Effect |
 | ---- | ------ | ------ |
+| 0 | `enable-activity-protocol.ps1` | Patch the agent endpoint to expose the **`activity`** protocol + **`BotServiceRbac`** auth (azd deploy only enables `responses`). Without this the Bot has no endpoint to call and Teams never gets a reply. |
 | 1 | (inline) | Register `Microsoft.BotService` provider (idempotent). |
 | 2 | `botservice.bicep` | Deploy an **Azure Bot Service** (`msaAppId` = blueprint id, endpoint = the agent's `activityProtocol` endpoint) + Teams channel. |
 | 3 | `publish-digital-worker.ps1` | POST the **Microsoft 365 publish** request → creates a pending blueprint in the M365 admin center. |
