@@ -45,18 +45,19 @@ flowchart LR
    **Blueprint Client ID** from `azd ai agent show workmate-agent`.
 2. **Register `Microsoft.BotService`** (once per subscription) if needed:
    `az provider register --namespace Microsoft.BotService`.
-3. **Publish as an autopilot:** from Foundry, publish the hosted agent as an **Agent 365
-   autopilot**. This provisions the **Azure Bot Service** transport and submits the **autopilot
-   request** that creates a pending blueprint in the Microsoft 365 admin center. (The end-to-end
-   reference automation is the
-   [FoundryA365 sample](https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/csharp/foundry-autopilot-agent).)
+3. **Publish as an autopilot:** run [`infra/a365/publish-autopilot.ps1`](../infra/a365/publish-autopilot.ps1).
+   It registers `Microsoft.BotService`, deploys the **Azure Bot Service** transport, submits the
+   **Microsoft 365 publish request** (creating a pending blueprint in the admin center), grants the
+   blueprint SP its MCP scopes, and adds you as blueprint owner. (This ports the FoundryA365
+   sample's post-provision flow — see [`infra/a365/README.md`](../infra/a365/README.md).)
 4. **Admin approval:** an **AI Administrator / Global Administrator** approves the pending request
    at [admin.cloud.microsoft/#/agents/all/requested](https://admin.cloud.microsoft/?#/agents/all/requested).
    After approval the agent appears in the **Agent 365 registry**.
-5. **Verify + use in Teams:** confirm the blueprint's messaging endpoint + app id in the
-   [Teams Developer Portal](https://dev.teams.microsoft.com/apps), then in Teams go to
-   **Apps → Agents for your team**, find the agent, and create an instance. It runs Work IQ **as
-   its own M365 identity** (its own mailbox), not on behalf of the person chatting with it.
+5. **Verify + use in Teams:** run [`infra/a365/configure-blueprint-backend.ps1`](../infra/a365/configure-blueprint-backend.ps1)
+   (or set the blueprint's **Bot ID** in the [Teams Developer Portal](https://dev.teams.microsoft.com/tools/agent-blueprint)),
+   then in Teams go to **Apps → Agents for your team**, find the agent, and create an instance. It
+   runs Work IQ **as its own M365 identity** (its own mailbox), not on behalf of the person
+   chatting with it.
 
 ## What the autopilot still needs for Work IQ
 

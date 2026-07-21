@@ -111,7 +111,9 @@ approval**. Note: Foundry's plain **Publish** button only creates a **Teams agen
 **Agent 365 autopilot** path is what registers the digital worker. In the Foundry playground the
 agent acts **on behalf of you** (Work IQ answers about your M365); as a Teams digital worker it
 acts **as its own M365 identity** (its own mailbox), not on behalf of the person chatting with it.
-`do_action` lets it take action (always after showing a draft). See [`docs/teams.md`](docs/teams.md).
+`do_action` lets it take action (always after showing a draft). Run
+[`infra/a365/publish-autopilot.ps1`](infra/a365/publish-autopilot.ps1) to submit the autopilot
+request; see [`infra/a365/README.md`](infra/a365/README.md) and [`docs/teams.md`](docs/teams.md).
 
 ## Slides
 
