@@ -35,9 +35,11 @@ already exists.
 1. **Admin approval** — an AI Administrator / Global Administrator approves the pending blueprint
    at [admin.cloud.microsoft/#/agents/all/requested](https://admin.cloud.microsoft/?#/agents/all/requested).
    After approval the agent appears in the **Agent 365 registry**.
-2. **Wire the backend** — run `./infra/a365/configure-blueprint-backend.ps1` (or, in the
-   [Teams Developer Portal](https://dev.teams.microsoft.com/tools/agent-blueprint), set the
-   blueprint's **Bot ID** = its blueprint/agent-identity client id).
+2. **Wire the backend (Bot ID)** — **do this in the portal UI**: open
+   `https://dev.teams.microsoft.com/tools/agent-blueprint/<blueprintId>` → **Configuration** →
+   set **Bot ID** = the blueprint/agent-identity client id → **Save**. The equivalent API
+   (`configure-blueprint-backend.ps1`) usually returns **403** even with a valid token, so the
+   portal UI is the reliable path (the upstream sample leaves this step commented out too).
 3. **Use it in Teams** — Apps → **Agents for your team** → find `workmate-agent` → create an
    instance. In Teams it runs Work IQ **as its own M365 identity** (its own mailbox), not on
    behalf of the person chatting with it.

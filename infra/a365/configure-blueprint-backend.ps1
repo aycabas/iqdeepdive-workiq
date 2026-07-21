@@ -1,7 +1,12 @@
 #!/usr/bin/env pwsh
 # Configures the blueprint's backend (bot) in the Teams Developer Portal so the approved digital
 # worker is wired to the Azure Bot. Bot ID == blueprint (agent identity) client id.
-# Needs a token for https://dev.teams.microsoft.com; run after admin approval.
+#
+# NOTE: The Teams Developer Portal blueprint-write API commonly returns 403 even with a valid
+# https://dev.teams.microsoft.com token (this is why the upstream FoundryA365 sample leaves this
+# step commented out). If this script 403s, set the Bot ID MANUALLY in the portal instead:
+#   https://dev.teams.microsoft.com/tools/agent-blueprint/<blueprintId>  ->  Configuration
+#   ->  Bot ID = <blueprintId>  ->  Save
 $ErrorActionPreference = "Stop"
 
 $blueprintId = $env:AGENT_IDENTITY_BLUEPRINT_ID

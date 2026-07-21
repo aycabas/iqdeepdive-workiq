@@ -53,11 +53,12 @@ flowchart LR
 4. **Admin approval:** an **AI Administrator / Global Administrator** approves the pending request
    at [admin.cloud.microsoft/#/agents/all/requested](https://admin.cloud.microsoft/?#/agents/all/requested).
    After approval the agent appears in the **Agent 365 registry**.
-5. **Verify + use in Teams:** run [`infra/a365/configure-blueprint-backend.ps1`](../infra/a365/configure-blueprint-backend.ps1)
-   (or set the blueprint's **Bot ID** in the [Teams Developer Portal](https://dev.teams.microsoft.com/tools/agent-blueprint)),
-   then in Teams go to **Apps → Agents for your team**, find the agent, and create an instance. It
-   runs Work IQ **as its own M365 identity** (its own mailbox), not on behalf of the person
-   chatting with it.
+5. **Verify + use in Teams:** set the blueprint's **Bot ID** in the
+   [Teams Developer Portal](https://dev.teams.microsoft.com/tools/agent-blueprint) (Configuration →
+   Bot ID = blueprint client id → Save — do this in the portal UI; the
+   `configure-blueprint-backend.ps1` API usually 403s). Then in Teams go to **Apps → Agents for
+   your team**, find the agent, and create an instance. It runs Work IQ **as its own M365
+   identity** (its own mailbox), not on behalf of the person chatting with it.
 
 ## What the autopilot still needs for Work IQ
 
