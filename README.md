@@ -13,7 +13,7 @@ user's own Microsoft 365 work context (email, meetings, files, chats, people). S
 world as Pamela's HR agent, but from the **employee's** point of view — and it can **take
 action** (draft and send follow-ups) via `do_action`, which a knowledge base cannot.
 
-This repo combines a five-part Work IQ notebook lab with one deployable
+This repo combines a four-part Work IQ notebook lab with one deployable
 [Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/) agent —
 **`workmate-agent`** — a Contoso "navigate my day" assistant that mounts Work IQ as a Foundry
 **toolbox** and ships as an **Agent 365 autopilot** (digital worker) in Microsoft Teams.
@@ -23,7 +23,7 @@ flowchart LR
   azd[azd up] --> conn[Work IQ RemoteA2A connection]
   conn --> toolbox[work-iq-tools toolbox]
   toolbox --> agent[Hosted workmate-agent]
-  conn --> notebooks[Five Work IQ notebooks]
+  conn --> notebooks[Four Work IQ notebooks]
   agent --> teams[Agent 365 autopilot in Teams]
 ```
 
@@ -45,7 +45,7 @@ context of the signed-in user and honors all Microsoft 365 permissions and sensi
 ## Repo layout
 
 ```
-notebooks/            Five-part Work IQ lab (parts 1–5)
+notebooks/            Four-part Work IQ lab (parts 1–4)
 src/workmate-agent/   The hosted agent: main.py + workiq_consent.py (Work IQ toolbox, MAF)
 infra/                setup-env.py + create-workiq-toolbox.py + postprovision hooks
 docs/teams.md         Publishing workmate-agent as an Agent 365 autopilot
@@ -91,8 +91,8 @@ Open `notebooks/` in VS Code, select `.venv`, and run:
 1. `part1-workiq-api-concepts.ipynb` — gateway, auth, `ask` / `fetch` / `search_paths` / `get_schema`
 2. `part2-workiq-a2a.ipynb` — the A2A agent card, discovery, JSON-RPC calls
 3. `part3-workiq-mcp.ipynb` — the 10 MCP verbs and runtime `get_schema`
-4. `part4-workiq-tools-actions.ipynb` — `do_action`, the only write path (send a follow-up mail)
-5. `part5-workiq-in-maf-agent.ipynb` — Work IQ inside a Microsoft Agent Framework agent
+4. `part4-workiq-tools-actions.ipynb` — the complete 10-tool catalog (Copilot / Schema / Entity), including `do_action`, the only write path
+5. `foundryiq-workiq.ipynb` — Work IQ as a knowledge source inside a Foundry IQ Knowledge Base (from Pamela's [Foundry IQ repo](https://github.com/pamelafox/iqdeepdive-foundryiq))
 
 ## Run and invoke the workmate agent
 
