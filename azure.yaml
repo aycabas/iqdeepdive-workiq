@@ -8,7 +8,7 @@ services:
         language: ""
         endpoint: ""
     workmate-agent:
-        project: src/workmate-agent
+        project: src/workmate-agent-maf
         host: azure.ai.agent
         language: python
         uses:

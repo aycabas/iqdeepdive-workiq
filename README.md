@@ -13,18 +13,19 @@ user's own Microsoft 365 work context (email, meetings, files, chats, people). S
 world as Pamela's HR agent, but from the **employee's** point of view — and it can **take
 action** (draft and send follow-ups) via `do_action`, which a knowledge base cannot.
 
-This repo combines a four-part Work IQ notebook lab with one deployable
-[Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/) agent —
-**`workmate-agent`** — a Contoso "navigate my day" assistant that mounts Work IQ as a Foundry
-**toolbox** and ships as an **Agent 365 autopilot** (digital worker) in Microsoft Teams.
+This repo combines a four-part Work IQ notebook lab with two agent variants:
+**`workmate-agent-maf`** — a [Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/)
+agent that mounts Work IQ as a Foundry **toolbox** and runs in the Foundry playground — and
+**`workmate-autopilot`** — the same assistant packaged as an **Agent 365 autopilot** (digital
+worker) that answers in Microsoft Teams over the Bot Framework activity protocol.
 
 ```mermaid
 flowchart LR
   azd[azd up] --> conn[Work IQ RemoteA2A connection]
   conn --> toolbox[work-iq-tools toolbox]
-  toolbox --> agent[Hosted workmate-agent]
+  toolbox --> agent[workmate-agent-maf · playground]
   conn --> notebooks[Four Work IQ notebooks]
-  agent --> teams[Agent 365 autopilot in Teams]
+  agent --> teams[workmate-autopilot · Teams]
 ```
 
 ## What Work IQ is
@@ -45,14 +46,15 @@ context of the signed-in user and honors all Microsoft 365 permissions and sensi
 ## Repo layout
 
 ```
-notebooks/            Four-part Work IQ lab (parts 1–4)
-src/workmate-agent/   The hosted agent: main.py + workiq_consent.py (Work IQ toolbox, MAF)
+notebooks/              Four-part Work IQ lab (parts 1–4)
+src/workmate-agent-maf/ MAF agent: main.py + workiq_consent.py (Work IQ toolbox) — Foundry playground
+src/workmate-autopilot/ Agent 365 digital worker (activity protocol) — answers in Teams
 infra/                setup-env.py + create-workiq-toolbox.py + postprovision hooks
 docs/teams.md         Publishing workmate-agent as an Agent 365 autopilot
 slides/               The talk deck
 ```
 
-The agent is intentionally two hand-written files — `main.py` builds a MAF `Agent` over a
+The MAF agent is intentionally two hand-written files — `main.py` builds a MAF `Agent` over a
 `FoundryChatClient` and a `FoundryToolbox` (the `work-iq-tools` toolbox), and `workiq_consent.py`
 teaches the MAF host to surface Work IQ's OAuth consent prompt.
 
